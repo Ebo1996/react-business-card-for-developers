@@ -1,116 +1,217 @@
+import { useState, useMemo, useEffect } from "react";
 import "./App.css";
 import Card from "./Components/Card/Card.jsx";
+import { teamMembers, getCategoryColors } from "./data/teamMembers.js";
+
 function App() {
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const [visibleCards, setVisibleCards] = useState([]);
+
+  // Get unique categories from members
+  const categories = useMemo(() => {
+    const cats = [...new Set(teamMembers.map((m) => m.category))];
+    return cats.map((cat) => ({
+      name: cat,
+      displayName: cat.charAt(0).toUpperCase() + cat.slice(1),
+      count: teamMembers.filter((m) => m.category === cat).length,
+    }));
+  }, []);
+
+  // Filter and search logic
+  const filteredMembers = useMemo(() => {
+    return teamMembers.filter((member) => {
+      const matchesFilter =
+        activeFilter === "all" || member.category === activeFilter;
+      const matchesSearch =
+        searchQuery === "" ||
+        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.skills.some((skill) =>
+          skill.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [activeFilter, searchQuery]);
+
+  // Animate cards appearing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisibleCards(filteredMembers.map((_, index) => index));
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [filteredMembers]);
+
+  const handleFilterClick = (filter) => {
+    setActiveFilter(filter);
+    setExpandedCards(new Set());
+  };
+
+  const toggleCardExpand = (memberId) => {
+    const newExpanded = new Set(expandedCards);
+    if (newExpanded.has(memberId)) {
+      newExpanded.delete(memberId);
+    } else {
+      newExpanded.add(memberId);
+    }
+    setExpandedCards(newExpanded);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setExpandedCards(new Set());
+  };
+
+  const totalCount = teamMembers.length;
+  const filteredCount = filteredMembers.length;
+
+  const headerStyle = {
+    textAlign: "center",
+    marginBottom: "50px",
+    color: "#2c3e50",
+  };
+
+  const searchContainerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "30px",
+  };
+
+  const searchInputStyle = {
+    padding: "12px 20px",
+    border: "2px solid #e0e0e0",
+    borderRadius: "50px",
+    fontSize: "1rem",
+    width: "400px",
+    maxWidth: "100%",
+    outline: "none",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+  };
+
   return (
-    <body>
-      <div class="wrapper">
-        <header>
+    <div>
+      <div className="wrapper">
+        <header style={headerStyle}>
           <h1>Our Team</h1>
-          <p class="subtitle">
-            Meet our talented team members. Feel free to connect with them.
+          <p className="subtitle">
+            Meet our talented team members. Connect and collaborate with them.
           </p>
+          <div
+            style={{ marginTop: "20px", color: "#7f8c8d", fontSize: "0.9rem" }}
+          >
+            Showing {filteredCount} of {totalCount} members
+          </div>
         </header>
 
-        <div class="filter-container">
-          <button class="filter-btn active" data-filter="all">
-            All
-          </button>
-          <button class="filter-btn" data-filter="development">
-            Development
-          </button>
-          <button class="filter-btn" data-filter="design">
-            Design
-          </button>
-          <button class="filter-btn" data-filter="management">
-            Management
-          </button>
+        <div style={searchContainerStyle}>
+          <input
+            type="text"
+            placeholder="Search by name, position, company, or skills..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            style={searchInputStyle}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#3498db";
+              e.target.style.boxShadow = "0 4px 15px rgba(52, 152, 219, 0.2)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#e0e0e0";
+              e.target.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.05)";
+            }}
+          />
         </div>
 
-        <Card
-          number={1}
-          image="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80"
-          alt="Michael Chen"
-          name="Michael Chen"
-          position="Senior Developer"
-          company="TechSolutions Inc."
-          email="michael.chen@techsolutions.com"
-          phone="+1 (555) 123-4567"
-          location="San Francisco, CA"
-          skills={["JavaScript", "React", "Node.js"]}
-          contactText="Contact Michael"
-        />
+        <div className="filter-container">
+          <button
+            className={`filter-btn ${activeFilter === "all" ? "active" : ""}`}
+            onClick={() => handleFilterClick("all")}
+          >
+            All ({totalCount})
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.name}
+              className={`filter-btn ${
+                activeFilter === cat.name ? "active" : ""
+              }`}
+              onClick={() => handleFilterClick(cat.name)}
+            >
+              {cat.displayName} ({cat.count})
+            </button>
+          ))}
+        </div>
 
-        <Card
-          number={2}
-          image="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA==&auto=format&fit=crop&w=100&q=80"
-          alt="Sarah Johnson"
-          name="Sarah Johnson"
-          position="UX/UI Designer"
-          company="CreativeMind Studios"
-          email="sarah@creativemind.com"
-          phone="+1 (555) 987-6543"
-          location="New York, NY"
-          skills={["UI Design", "Illustration", "Prototyping"]}
-          contactText="Contact Sarah"
-        />
+        <div className="cards-container">
+          {filteredMembers.map((member, index) => (
+            <div
+              key={member.id}
+              style={{
+                animation: `fadeInUp 0.5s ease ${index * 0.1}s both`,
+              }}
+            >
+              <Card
+                member={member}
+                colors={getCategoryColors(member.id)}
+                isExpanded={expandedCards.has(member.id)}
+                onToggleExpand={toggleCardExpand}
+              />
+            </div>
+          ))}
+        </div>
 
-        <Card
-          number={3}
-          image="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80"
-          alt="David Wilson"
-          name="David Wilson"
-          position="Project Manager"
-          company="NextGen Innovations"
-          email="david.wilson@nextgen.com"
-          phone="+1 (444) 555-6789"
-          location="Austin, TX"
-          skills={["Agile", "Scrum", "Product Management"]}
-          contactText="Contact David"
-        />
-
-        <Card
-          number={4}
-          image="https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80"
-          alt="Emma Rodriguez"
-          name="Emma Rodriguez"
-          position="Frontend Developer"
-          company="WebCraft Inc."
-          email="emma@webcraft.com"
-          phone="+1 (777) 888-9999"
-          location="Seattle, WA"
-          skills={["Vue.js", "CSS", "Responsive Design"]}
-          contactText="Contact Emma"
-        />
-
-        <Card
-          number={5}
-          image="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80"
-          alt="James Anderson"
-          name="James Anderson"
-          position="Graphic Designer"
-          company="DesignHub Agency"
-          email="james@designhub.com"
-          phone="+1 (333) 444-5555"
-          location="Chicago, IL"
-          skills={["Branding", "Typography", "Print Design"]}
-          contactText="Contact James"
-        />
-
-        <Card
-          number={6}
-          image="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80"
-          alt="Sophia Williams"
-          name="Sophia Williams"
-          position="Product Manager"
-          company="InnovateTech"
-          email="sophia@innovatetech.com"
-          phone="+1 (222) 333-4444"
-          location="Boston, MA"
-          skills={["Product Strategy", "Analytics", "UX Research"]}
-          contactText="Contact Sophia"
-        />
+        {filteredMembers.length === 0 && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "60px 20px",
+              color: "#7f8c8d",
+              fontSize: "1.2rem",
+            }}
+          >
+            <i
+              className="fas fa-search"
+              style={{
+                fontSize: "3rem",
+                marginBottom: "20px",
+                display: "block",
+                opacity: 0.3,
+              }}
+            ></i>
+            <p>No team members found matching your criteria.</p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setActiveFilter("all");
+              }}
+              style={{
+                marginTop: "20px",
+                padding: "10px 30px",
+                border: "none",
+                borderRadius: "25px",
+                background: "linear-gradient(to right, #6a11cb, #2575fc)",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "600",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.target.style.transform = "translateY(-2px)")
+              }
+              onMouseLeave={(e) => (e.target.style.transform = "translateY(0)")}
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
-    </body>
+    </div>
   );
 }
+
 export default App;
