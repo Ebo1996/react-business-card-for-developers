@@ -54,7 +54,17 @@ src/
 │       └── Card.jsx          # Interactive card component with hooks
 ├── data/
 │   └── teamMembers.js        # Data source for team members
-├── App.jsx                   # Main app with filtering & search logic
+├── hooks/
+│   └── useTeamMembers.js     # Custom hook for team member management
+├── utils/
+│   ├── index.js              # Central export for all utilities
+│   ├── filterUtils.js        # Filtering and search logic
+│   ├── animationUtils.js     # Animation and transition helpers
+│   ├── styleUtils.js         # Dynamic style generation
+│   ├── dataUtils.js          # Data manipulation utilities
+│   ├── eventUtils.js         # Event handling utilities
+│   └── storageUtils.js       # LocalStorage utilities
+├── App.jsx                   # Main app component
 ├── App.css                   # Component styles
 ├── index.css                 # Global styles
 └── main.jsx                  # App entry point
