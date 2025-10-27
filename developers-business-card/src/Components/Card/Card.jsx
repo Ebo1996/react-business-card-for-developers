@@ -1,20 +1,25 @@
 import { useState } from "react";
+import { getGradientStyle } from "../../utils/styleUtils.js";
+import { getExpandTransform, getHeightTransition, getClickScale } from "../../utils/animationUtils.js";
+import { generateEmailLink, getFirstName } from "../../utils/dataUtils.js";
 
 export default function Card({ member, colors, isExpanded, onToggleExpand }) {
   const [contactClicked, setContactClicked] = useState(false);
 
-  const gradientStyle = {
-    background: `linear-gradient(to right, ${colors[0]}, ${colors[1]})`,
-    backgroundImage: `linear-gradient(to right, ${colors[0]}, ${colors[1]})`,
-  };
+  const gradientStyle = getGradientStyle(colors[0], colors[1]);
 
   const handleContact = (e) => {
     e.preventDefault();
     setContactClicked(true);
     setTimeout(() => setContactClicked(false), 300);
 
-    // Simulate contact action
-    const emailLink = `mailto:${member.email}?subject=Business Inquiry&body=Hello ${member.name},`;
+    // Open email client with pre-filled email
+    const emailLink = generateEmailLink(
+      member.email,
+      "Business Inquiry",
+      "",
+      member.name
+    );
     window.location.href = emailLink;
   };
 
@@ -26,22 +31,18 @@ export default function Card({ member, colors, isExpanded, onToggleExpand }) {
   };
 
   const cardStyle = {
-    transform: isExpanded ? "translateY(-10px) scale(1.02)" : "translateY(0)",
+    ...getExpandTransform(isExpanded),
     opacity: 1,
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   };
 
   const buttonStyle = {
     ...gradientStyle,
-    transform: contactClicked ? "scale(0.95)" : "scale(1)",
-    transition: "all 0.2s ease",
+    ...getClickScale(contactClicked),
   };
 
   const socialLinkStyle = {
     ...gradientStyle,
-    transform: "scale(1)",
-    transition: "all 0.2s ease",
-    textDecoration: "none",
     width: "36px",
     height: "36px",
     borderRadius: "50%",
@@ -50,7 +51,10 @@ export default function Card({ member, colors, isExpanded, onToggleExpand }) {
     justifyContent: "center",
     color: "white",
     fontSize: "1rem",
+    textDecoration: "none",
     cursor: "pointer",
+    transition: "all 0.2s ease",
+    transform: "scale(1)",
   };
 
   return (
@@ -78,11 +82,7 @@ export default function Card({ member, colors, isExpanded, onToggleExpand }) {
       </div>
       <div
         className="card-body"
-        style={{
-          maxHeight: isExpanded ? "500px" : "200px",
-          transition: "max-height 0.4s ease",
-          overflow: "hidden",
-        }}
+        style={getHeightTransition(isExpanded)}
       >
         <div className="info">
           <i className="fas fa-envelope"></i>
@@ -115,7 +115,7 @@ export default function Card({ member, colors, isExpanded, onToggleExpand }) {
           onClick={handleContact}
           style={buttonStyle}
         >
-          Contact {member.name.split(" ")[0]}
+          Contact {getFirstName(member.name)}
         </button>
         <div className="social-icons">
           <a
