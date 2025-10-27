@@ -1,23 +1,8 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 .wrapper {
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
+    min-height: 100vh;
 }
 
 header {
@@ -65,11 +50,11 @@ h1:after {
     border-radius: 18px;
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 .card:before {
@@ -79,11 +64,6 @@ h1:after {
     left: 0;
     width: 100%;
     height: 5px;
-}
-
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .card-1:before { background: linear-gradient(to right, #ff7e5f, #feb47b); }
@@ -182,17 +162,10 @@ h1:after {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
+    color: white;
 }
-
-.card-1 .contact-btn { background: linear-gradient(to right, #ff7e5f, #feb47b); color: white; }
-.card-2 .contact-btn { background: linear-gradient(to right, #00c9ff, #92fe9d); color: white; }
-.card-3 .contact-btn { background: linear-gradient(to right, #f09819, #edde5d); color: white; }
-.card-4 .contact-btn { background: linear-gradient(to right, #834d9b, #d04ed6); color: white; }
-.card-5 .contact-btn { background: linear-gradient(to right, #4b6cb7, #182848); color: white; }
-.card-6 .contact-btn { background: linear-gradient(to right, #fd746c, #ff9068); color: white; }
 
 .contact-btn:hover {
     transform: translateY(-3px);
@@ -205,7 +178,7 @@ h1:after {
     gap: 12px;
 }
 
-.social-icons a {
+.social-link {
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -215,16 +188,10 @@ h1:after {
     color: white;
     font-size: 1rem;
     transition: all 0.3s ease;
+    text-decoration: none;
 }
 
-.card-1 .social-icons a { background: linear-gradient(to right, #ff7e5f, #feb47b); }
-.card-2 .social-icons a { background: linear-gradient(to right, #00c9ff, #92fe9d); }
-.card-3 .social-icons a { background: linear-gradient(to right, #f09819, #edde5d); }
-.card-4 .social-icons a { background: linear-gradient(to right, #834d9b, #d04ed6); }
-.card-5 .social-icons a { background: linear-gradient(to right, #4b6cb7, #182848); }
-.card-6 .social-icons a { background: linear-gradient(to right, #fd746c, #ff9068); }
-
-.social-icons a:hover {
+.social-link:hover {
     transform: scale(1.1);
 }
 
@@ -253,8 +220,24 @@ h1:after {
     color: white;
 }
 
-.hidden {
-    display: none;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @media (max-width: 768px) {
@@ -264,5 +247,14 @@ h1:after {
     
     h1 {
         font-size: 2.2rem;
+    }
+    
+    .filter-container {
+        gap: 5px;
+    }
+    
+    .filter-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
     }
 }
