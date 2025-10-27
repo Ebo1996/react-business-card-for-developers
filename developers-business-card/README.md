@@ -80,13 +80,26 @@ src/
 
 ## Key JavaScript Features
 
-1. **Search Functionality**: Real-time search using filter arrays and string matching
-2. **Category Filtering**: Dynamic category buttons with active state management
-3. **Card Interactions**: Expand/collapse functionality with state tracking
-4. **Dynamic Styling**: Inline styles generated from data
-5. **Performance Optimization**: useMemo for filtered results
-6. **Animation Control**: JavaScript-controlled animations with state
-7. **Event Handling**: Interactive buttons and social links with click handlers
+### Core Functionality
+1. **Real-time Search**: Search team members by name, position, company, or skills
+2. **Dynamic Filtering**: Filter by category with member counts
+3. **Card Interactions**: Click to expand/collapse with smooth animations
+4. **Contact Integration**: One-click email contact button
+5. **Social Links**: Dynamic social media links that open in new tabs
+
+### JavaScript Architecture
+1. **Custom React Hooks**: `useTeamMembers` hook for centralized state management
+2. **Utility Modules**: 6+ utility files for different concerns:
+   - `filterUtils.js` - Filtering and search logic
+   - `animationUtils.js` - Animation and transition helpers
+   - `styleUtils.js` - Dynamic style generation
+   - `dataUtils.js` - Data manipulation (debounce, throttle, sorting)
+   - `eventUtils.js` - Event handling and DOM utilities
+   - `storageUtils.js` - LocalStorage management
+3. **Performance**: useMemo for optimized filtering and rendering
+4. **Reusable Functions**: Modular, testable utility functions
+5. **Dynamic Styling**: Programmatic style generation from data
+6. **State Management**: Centralized state with custom hooks
 
 ## Adding Team Members
 
