@@ -1,96 +1,36 @@
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import "./App.css";
 import Card from "./Components/Card/Card.jsx";
 import { teamMembers, getCategoryColors } from "./data/teamMembers.js";
+import { useTeamMembers } from "./hooks/useTeamMembers.js";
+import { getHeaderStyle, getSearchInputStyle, getInputFocusState } from "./utils/styleUtils.js";
+import { getStaggeredAnimation } from "./utils/animationUtils.js";
 
 function App() {
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [expandedCards, setExpandedCards] = useState(new Set());
-  const [visibleCards, setVisibleCards] = useState([]);
-
-  // Get unique categories from members
-  const categories = useMemo(() => {
-    const cats = [...new Set(teamMembers.map((m) => m.category))];
-    return cats.map((cat) => ({
-      name: cat,
-      displayName: cat.charAt(0).toUpperCase() + cat.slice(1),
-      count: teamMembers.filter((m) => m.category === cat).length,
-    }));
-  }, []);
-
-  // Filter and search logic
-  const filteredMembers = useMemo(() => {
-    return teamMembers.filter((member) => {
-      const matchesFilter =
-        activeFilter === "all" || member.category === activeFilter;
-      const matchesSearch =
-        searchQuery === "" ||
-        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.skills.some((skill) =>
-          skill.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-      return matchesFilter && matchesSearch;
-    });
-  }, [activeFilter, searchQuery]);
-
-  // Animate cards appearing
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisibleCards(filteredMembers.map((_, index) => index));
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [filteredMembers]);
-
-  const handleFilterClick = (filter) => {
-    setActiveFilter(filter);
-    setExpandedCards(new Set());
-  };
-
-  const toggleCardExpand = (memberId) => {
-    const newExpanded = new Set(expandedCards);
-    if (newExpanded.has(memberId)) {
-      newExpanded.delete(memberId);
-    } else {
-      newExpanded.add(memberId);
-    }
-    setExpandedCards(newExpanded);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setExpandedCards(new Set());
-  };
+  const {
+    filteredMembers,
+    categories,
+    stats,
+    activeFilter,
+    searchQuery,
+    handleFilterClick,
+    handleSearchChange,
+    toggleCardExpand,
+    clearFilters,
+    isCardExpanded,
+  } = useTeamMembers(teamMembers);
 
   const totalCount = teamMembers.length;
   const filteredCount = filteredMembers.length;
 
-  const headerStyle = {
-    textAlign: "center",
-    marginBottom: "50px",
-    color: "#2c3e50",
-  };
+  const headerStyle = useMemo(() => getHeaderStyle(), []);
+  const searchInputStyle = useMemo(() => getSearchInputStyle(), []);
 
-  const searchContainerStyle = {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "30px",
-  };
-
-  const searchInputStyle = {
-    padding: "12px 20px",
-    border: "2px solid #e0e0e0",
-    borderRadius: "50px",
-    fontSize: "1rem",
-    width: "400px",
-    maxWidth: "100%",
-    outline: "none",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+  const handleInputFocus = (e, isFocused) => {
+    const focusStyle = getInputFocusState(isFocused);
+    Object.entries(focusStyle).forEach(([key, value]) => {
+      e.target.style[key] = value;
+    });
   };
 
   return (
@@ -108,21 +48,15 @@ function App() {
           </div>
         </header>
 
-        <div style={searchContainerStyle}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "30px" }}>
           <input
             type="text"
             placeholder="Search by name, position, company, or skills..."
             value={searchQuery}
             onChange={handleSearchChange}
             style={searchInputStyle}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#3498db";
-              e.target.style.boxShadow = "0 4px 15px rgba(52, 152, 219, 0.2)";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#e0e0e0";
-              e.target.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.05)";
-            }}
+            onFocus={(e) => handleInputFocus(e, true)}
+            onBlur={(e) => handleInputFocus(e, false)}
           />
         </div>
 
@@ -150,14 +84,12 @@ function App() {
           {filteredMembers.map((member, index) => (
             <div
               key={member.id}
-              style={{
-                animation: `fadeInUp 0.5s ease ${index * 0.1}s both`,
-              }}
+              style={getStaggeredAnimation(index)}
             >
               <Card
                 member={member}
                 colors={getCategoryColors(member.id)}
-                isExpanded={expandedCards.has(member.id)}
+                isExpanded={isCardExpanded(member.id)}
                 onToggleExpand={toggleCardExpand}
               />
             </div>
@@ -184,10 +116,7 @@ function App() {
             ></i>
             <p>No team members found matching your criteria.</p>
             <button
-              onClick={() => {
-                setSearchQuery("");
-                setActiveFilter("all");
-              }}
+              onClick={clearFilters}
               style={{
                 marginTop: "20px",
                 padding: "10px 30px",
